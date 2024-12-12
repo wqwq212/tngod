@@ -1,1 +1,3 @@
 feedparser
+
+pip install beautifulsoup4
