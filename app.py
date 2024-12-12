@@ -5,7 +5,7 @@ import feedparser
 from bs4 import BeautifulSoup
 
 # NewsAPI.org 설정 (무료 플랜 사용)
-NEWS_API_KEY = "YOUR_NEWSAPI_KEY"  # NewsAPI.org에서 발급받은 API 키 입력
+NEWS_API_KEY = "d86964d07ac94c6d912dc929f6e2895e"  # NewsAPI.org에서 발급받은 API 키 입력
 NEWS_API_URL = "https://newsapi.org/v2/everything"
 
 # RSS 피드 URL 목록
