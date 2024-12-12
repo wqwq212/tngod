@@ -23,7 +23,7 @@ def fetch_newsapi_data():
     global news_data
     params = {
         "q": "계엄 OR 탄핵",  # 키워드 검색
-        "apiKey": d86964d07ac94c6d912dc929f6e2895e,
+        "apiKey": NEWS_API_KEY,
         "language": "ko",
         "sortBy": "publishedAt",
         "pageSize": 20
