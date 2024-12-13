@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.applications.resnet50 import preprocess_input
-from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing import image as keras_image
 import requests
 from PIL import Image
 import io
@@ -21,8 +21,8 @@ def extract_colors(image, num_colors=5):
 model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
 def extract_features(image_path):
-    img = image.load_img(image_path, target_size=(224, 224))
-    img_array = image.img_to_array(img)
+    img = keras_image.load_img(image_path, target_size=(224, 224))
+    img_array = keras_image.img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
     img_array = preprocess_input(img_array)
     features = model.predict(img_array)
@@ -31,7 +31,7 @@ def extract_features(image_path):
 # Stable Diffusion API 호출 함수
 def generate_character(prompt):
     api_url = "https://api.stability.ai/v1/generation"
-    headers = {"Authorization": "sk-f03E0V3fw8MS4tV6OA5Bkmb7FgYxpLpHTxaAKkp3fBnj9PWM"}
+    headers = {"Authorization": "sk-f03E0V3fw8MS4tV6OA5Bkmb7FgYxpLpHTxaAKkp3fBnj9PWM"}  # YOUR_API_KEY를 실제 API 키로 변경하세요.
     data = {
         "prompt": prompt,
         "width": 512,
@@ -39,15 +39,15 @@ def generate_character(prompt):
         "samples": 1
     }
     response = requests.post(api_url, headers=headers, json=data)
-    return response.content
-    
-   # API 응답 상태 확인
+
     if response.status_code != 200:
         st.error(f"API 호출 실패! 상태 코드: {response.status_code}")
         st.write("응답 내용:", response.text)
         return None
+
     return response.content
 
+# 이미지 데이터 유효성 확인
 def validate_image(image_data):
     try:
         Image.open(io.BytesIO(image_data)).verify()
@@ -71,7 +71,7 @@ if uploaded_file:
     colors = extract_colors(image_data)
     st.write("추출된 주요 색상:")
     for color in colors:
-        st.write(f"RGB 값: {color}")
+        st.write(f"RGB 값: {color.astype(int)}")
 
     # 특징 추출
     file_path = "uploaded_image.jpg"
@@ -81,9 +81,10 @@ if uploaded_file:
     st.write("추출된 이미지 특징 벡터:", features)
 
     # 캐릭터 생성
-    prompt = "A cute pink cat with a bright bow in a soft background"
-    generated_image = generate_character(prompt)
-    with open("generated_character.jpg", "wb") as f:
-        f.write(generated_image)
-    st.image("generated_character.jpg", caption="생성된 캐릭터")
-
+    prompt = st.text_input("캐릭터 생성 프롬프트를 입력하세요", "A cute pink cat with a bright bow in a soft background")
+    if st.button("캐릭터 생성"):
+        generated_image = generate_character(prompt)
+        if generated_image and validate_image(generated_image):
+            with open("generated_character.jpg", "wb") as f:
+                f.write(generated_image)
+            st.image("generated_character.jpg", caption="생성된 캐릭터")
