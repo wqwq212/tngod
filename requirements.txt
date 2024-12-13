@@ -1,2 +1,6 @@
-beautifulsoup4
-feedparser
+streamlit
+opencv-python-headless
+scikit-learn
+tensorflow
+requests
+matplotlib
