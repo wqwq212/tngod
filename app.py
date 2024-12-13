@@ -28,24 +28,32 @@ def extract_features(image_path):
     features = model.predict(img_array)
     return features
 
-# Stable Diffusion API 호출 함수
-def generate_character(prompt):
-    api_url = "https://platform.stability.ai/account/keys"
-    headers = {"Authorization": "sk-o7AiiuKV7gLU0zCjhne3fKtUTmyRL9gVgKpc2VgrnGp3CnOa"}  # YOUR_API_KEY를 실제 API 키로 변경하세요.
-    data = {
-        "prompt": prompt,
-        "width": 512,
-        "height": 512,
-        "samples": 1
-    }
-    response = requests.post(api_url, headers=headers, json=data)
+import requests
 
-    if response.status_code != 200:
-        st.error(f"API 호출 실패! 상태 코드: {response.status_code}")
-        st.write("응답 내용:", response.text)
-        return None
+# API 정보
+api_url = "https://api.stability.ai/v1beta/generation/stable-diffusion-v1-5/text-to-image"
+headers = {"Authorization": "Bearer YOUR_API_KEY"}  # 실제 API 키로 변경
+data = {
+    "prompt": "A cute pink cat with a bright bow in a soft background",
+    "width": 512,
+    "height": 512,
+    "samples": 1,
+    "cfg_scale": 7.5,
+    "sampler": "ddim"
+}
 
-    return response.content
+# POST 요청
+response = requests.post(api_url, headers=headers, json=data)
+
+# 응답 처리
+if response.status_code == 200:
+    with open("generated_character.jpg", "wb") as f:
+        f.write(response.content)
+    print("이미지 생성 성공!")
+else:
+    print(f"API 호출 실패! 상태 코드: {response.status_code}")
+    print("응답 내용:", response.text)
+
 
 # 이미지 데이터 유효성 확인
 def validate_image(image_data):
