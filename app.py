@@ -32,7 +32,7 @@ import requests
 
 # API 정보
 api_url = "https://api.stability.ai/v1beta/generation/stable-diffusion-v1-5/text-to-image"
-headers = {"Authorization": "Bearer YOUR_API_KEY"}  # 실제 API 키로 변경
+headers = {"Authorization": "sk-o7AiiuKV7gLU0zCjhne3fKtUTmyRL9gVgKpc2VgrnGp3CnOa"}  # 실제 API 키로 변경
 data = {
     "prompt": "A cute pink cat with a bright bow in a soft background",
     "width": 512,
@@ -66,7 +66,7 @@ def validate_image(image_data):
         return False
 
 # Streamlit UI 구성
-st.title("나만의 브랜드 캐릭터 생성")
+st.title("나만의 캐릭터 생성")
 uploaded_file = st.file_uploader("이미지를 업로드하세요", type=["jpg", "png"])
 
 if uploaded_file:
@@ -88,11 +88,36 @@ if uploaded_file:
     features = extract_features(file_path)
     st.write("추출된 이미지 특징 벡터:", features)
 
-    # 캐릭터 생성
-    prompt = st.text_input("캐릭터 생성 프롬프트를 입력하세요", "A cute pink cat with a bright bow in a soft background")
-    if st.button("캐릭터 생성"):
+   # 캐릭터 생성 함수 정의
+def generate_character(prompt):
+    api_url = "https://api.stability.ai/v1beta/generation/stable-diffusion-v1-5/text-to-image"
+    headers = {"Authorization": "sk-o7AiiuKV7gLU0zCjhne3fKtUTmyRL9gVgKpc2VgrnGp3CnOa"}  # 실제 API 키로 변경
+    data = {
+        "prompt": prompt,
+        "width": 512,
+        "height": 512,
+        "samples": 1,
+        "cfg_scale": 7.5,
+        "sampler": "ddim"
+    }
+
+    response = requests.post(api_url, headers=headers, json=data)
+
+    if response.status_code != 200:
+        raise ValueError(f"API 호출 실패: {response.status_code}, {response.text}")
+
+    return response.content
+
+# Streamlit UI
+import streamlit as st
+
+st.title("나만의 브랜드 캐릭터 생성")
+prompt = st.text_input("캐릭터 생성 프롬프트를 입력하세요", "A cute pink cat with a bright bow in a soft background")
+if st.button("캐릭터 생성"):
+    try:
         generated_image = generate_character(prompt)
-        if generated_image and validate_image(generated_image):
-            with open("generated_character.jpg", "wb") as f:
-                f.write(generated_image)
-            st.image("generated_character.jpg", caption="생성된 캐릭터")
+        with open("generated_character.jpg", "wb") as f:
+            f.write(generated_image)
+        st.image("generated_character.jpg", caption="생성된 캐릭터")
+    except Exception as e:
+        st.error(f"오류 발생: {e}")
