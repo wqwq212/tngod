@@ -6,6 +6,9 @@ from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.preprocessing import image
 import requests
+from PIL import Image
+import io
+import os
 
 # 색상 추출 함수
 def extract_colors(image, num_colors=5):
@@ -37,6 +40,22 @@ def generate_character(prompt):
     }
     response = requests.post(api_url, headers=headers, json=data)
     return response.content
+    
+   # API 응답 상태 확인
+    if response.status_code != 200:
+        st.error(f"API 호출 실패! 상태 코드: {response.status_code}")
+        st.write("응답 내용:", response.text)
+        return None
+    return response.content
+
+def validate_image(image_data):
+    try:
+        Image.open(io.BytesIO(image_data)).verify()
+        return True
+    except Exception as e:
+        st.error("이미지 데이터가 유효하지 않습니다.")
+        st.write("오류 내용:", e)
+        return False
 
 # Streamlit UI 구성
 st.title("나만의 브랜드 캐릭터 생성")
@@ -68,51 +87,3 @@ if uploaded_file:
         f.write(generated_image)
     st.image("generated_character.jpg", caption="생성된 캐릭터")
 
-import requests
-import streamlit as st
-from PIL import Image
-import io
-import os
-
-def generate_character(prompt):
-    api_url = "https://api.stability.ai/v1/generation"
-    headers = {"Authorization": "Bearer YOUR_API_KEY"}
-    data = {
-        "prompt": prompt,
-        "width": 512,
-        "height": 512,
-        "samples": 1
-    }
-    response = requests.post(api_url, headers=headers, json=data)
-
-    # API 응답 상태 확인
-    if response.status_code != 200:
-        st.error(f"API 호출 실패! 상태 코드: {response.status_code}")
-        st.write("응답 내용:", response.text)
-        return None
-    return response.content
-
-def validate_image(image_data):
-    try:
-        Image.open(io.BytesIO(image_data)).verify()
-        return True
-    except Exception as e:
-        st.error("이미지 데이터가 유효하지 않습니다.")
-        st.write("오류 내용:", e)
-        return False
-
-# Streamlit UI
-st.title("나만의 브랜드 캐릭터 생성")
-prompt = st.text_input("캐릭터 생성 프롬프트를 입력하세요:", "A cute pink cat with a bright bow in a soft background")
-
-if st.button("캐릭터 생성"):
-    st.write("캐릭터를 생성 중입니다...")
-    generated_image = generate_character(prompt)
-    
-    if generated_image and validate_image(generated_image):
-        save_path = os.path.join(os.getcwd(), "generated_character.jpg")
-        with open(save_path, "wb") as f:
-            f.write(generated_image)
-        st.image(save_path, caption="생성된 캐릭터")
-    else:
-        st.error("캐릭터 생성에 실패했습니다.")
