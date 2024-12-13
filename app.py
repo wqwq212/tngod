@@ -31,7 +31,7 @@ def extract_features(image_path):
 # Stable Diffusion API 호출 함수
 def generate_character(prompt):
     api_url = "https://api.stability.ai/v1/generation"
-    headers = {"Authorization": "sk-f03E0V3fw8MS4tV6OA5Bkmb7FgYxpLpHTxaAKkp3fBnj9PWM"}  # YOUR_API_KEY를 실제 API 키로 변경하세요.
+    headers = {"Authorization": "sk-o7AiiuKV7gLU0zCjhne3fKtUTmyRL9gVgKpc2VgrnGp3CnOa"}  # YOUR_API_KEY를 실제 API 키로 변경하세요.
     data = {
         "prompt": prompt,
         "width": 512,
